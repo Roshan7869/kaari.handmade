@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project -type f -name *.json -o -name *.ts -o -name *.tsx -o -name *.js -o -name *.cjs -o -name *.mjs -o -name *.config.*)",
+      "Bash(npx:*)",
+      "Bash(pkill -f \"create-next-app\")",
+      "Bash(mkdir -p /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/nextjs-app)",
+      "Bash(mkdir -p nextjs-app/components/ui)",
+      "Bash(cp src/components/ui/*.tsx nextjs-app/components/ui/)",
+      "Bash(cp src/components/ui/*.ts nextjs-app/components/ui/)",
+      "Bash(grep -v \"ui$\")",
+      "Bash(grep \"\\\\.tsx$\")",
+      "Bash(cp:*)",
+      "Bash(for file:*)",
+      "Bash(do head:*)",
+      "Bash(git:*)",
+      "Bash(find nextjs-app:*)",
+      "Bash(ls -la *.ts)",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/nextjs-app -type f -name *.ts -o -name *.tsx -o -name *.json)",
+      "Bash(mkdir -p /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/nextjs-app/public/images)",
+      "Bash(mkdir -p /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/nextjs-app/public/images/products)",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/nextjs-app -name products* -type f)",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src/pages -type f -name *.tsx -o -name *.ts)",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src/contexts -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src/hooks -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src/lib -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src/integrations -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(ls -la /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/*.json /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/*.config.*)",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src/test -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(find /mnt/c/Users/USER/Downloads/project-bolt-github-t6mylefb/project/src -maxdepth 1 -name index.*)"
+    ]
+  }
+}
