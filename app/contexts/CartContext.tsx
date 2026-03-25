@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
-import { trackEvent } from "@/lib/analytics";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
+import type { Tables } from '@/types/database';
+import { trackEvent } from '@/lib/analytics';
 
 export interface CartCustomization {
   message: string;
@@ -14,7 +14,7 @@ export interface CartCustomization {
   deliveryDeadline?: string;
   budgetMin?: number;
   budgetMax?: number;
-  quoteStatus: "not_needed" | "pending" | "approved" | "rejected";
+  quoteStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
   requiresManualReview: boolean;
   uploads: Array<{
     id: string;
@@ -28,7 +28,7 @@ export interface CartItem {
   productId: string;
   variantId?: string;
   title: string;
-  itemType: "standard" | "customized";
+  itemType: 'standard' | 'customized';
   quantity: number;
   unitPrice: number;
   lineTotal: number;
@@ -52,7 +52,7 @@ interface CartContextType {
   cart: Cart | null;
   loading: boolean;
   error: string | null;
-  addToCart: (item: Omit<CartItem, "cartItemId" | "lineTotal">) => Promise<void>;
+  addToCart: (item: Omit<CartItem, 'cartItemId' | 'lineTotal'>) => Promise<void>;
   updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   removeItem: (cartItemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -64,7 +64,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error("useCart must be used within CartProvider");
+    throw new Error('useCart must be used within CartProvider');
   }
   return context;
 };
@@ -73,11 +73,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const supabase = createClient();
 
   const calculatePricing = (items: CartItem[]) => {
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
@@ -87,23 +84,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return { subtotal, shipping, tax, total };
   };
 
-  type CartItemCustomizationRow = Tables<"cart_item_customizations"> & {
-    customization_uploads: Tables<"customization_uploads">[] | null;
+  type CartItemCustomizationRow = Tables<'cart_item_customizations'> & {
+    customization_uploads: Tables<'customization_uploads'>[] | null;
   };
 
-  type CartItemWithRelations = Tables<"cart_items"> & {
-    products: Pick<Tables<"products">, "title"> | null;
+  type CartItemWithRelations = Tables<'cart_items'> & {
+    products: Pick<Tables<'products'>, 'title'> | null;
     cart_item_customizations: CartItemCustomizationRow | null;
   };
-  type VariantStockRow = Pick<Tables<"product_variants">, "id" | "product_id" | "stock_qty" | "is_default">;
+  type VariantStockRow = Pick<Tables<'product_variants'>, 'id' | 'product_id' | 'stock_qty' | 'is_default'>;
 
   const getOrCreateActiveCart = useCallback(async (userId: string) => {
     const { data: existingCart, error: existingCartError } = await supabase
-      .from("carts")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
+      .from('carts')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -111,22 +108,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (existingCart) return existingCart;
 
     const { data: createdCart, error: createCartError } = await supabase
-      .from("carts")
-      .insert({ user_id: userId, status: "active", currency: "INR" })
+      .from('carts')
+      .insert({ user_id: userId, status: 'active', currency: 'INR' })
       .select()
       .single();
 
     if (createCartError) throw createCartError;
     return createdCart;
-  }, []);
+  }, [supabase]);
 
   const resolveVariantForStock = useCallback(async (productId: string, variantId?: string): Promise<VariantStockRow | null> => {
     if (variantId) {
       const { data, error } = await supabase
-        .from("product_variants")
-        .select("id, product_id, stock_qty, is_default")
-        .eq("id", variantId)
-        .eq("product_id", productId)
+        .from('product_variants')
+        .select('id, product_id, stock_qty, is_default')
+        .eq('id', variantId)
+        .eq('product_id', productId)
         .maybeSingle();
 
       if (error) throw error;
@@ -134,20 +131,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { data, error } = await supabase
-      .from("product_variants")
-      .select("id, product_id, stock_qty, is_default")
-      .eq("product_id", productId)
-      .order("is_default", { ascending: false })
+      .from('product_variants')
+      .select('id, product_id, stock_qty, is_default')
+      .eq('product_id', productId)
+      .order('is_default', { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (error) throw error;
     return data;
-  }, []);
+  }, [supabase]);
 
   const refreshCart = useCallback(async () => {
-    if (!mounted) return;
-
     try {
       setLoading(true);
       setError(null);
@@ -161,7 +156,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const activeCart = await getOrCreateActiveCart(user.id);
 
       const { data: items, error: itemsError } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .select(`
           *,
           products (title),
@@ -170,7 +165,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             customization_uploads (*)
           )
         `)
-        .eq("cart_id", activeCart.id);
+        .eq('cart_id', activeCart.id);
 
       if (itemsError) throw itemsError;
 
@@ -178,8 +173,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         cartItemId: item.id,
         productId: item.product_id,
         variantId: item.variant_id || undefined,
-        title: item.products?.title || "Unknown Product",
-        itemType: (item.item_type as "standard" | "customized") || "standard",
+        title: item.products?.title || 'Unknown Product',
+        itemType: (item.item_type as 'standard' | 'customized') || 'standard',
         quantity: item.quantity,
         unitPrice: item.unit_price,
         lineTotal: item.line_total,
@@ -191,7 +186,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           deliveryDeadline: item.cart_item_customizations.delivery_deadline || undefined,
           budgetMin: item.cart_item_customizations.budget_min || undefined,
           budgetMax: item.cart_item_customizations.budget_max || undefined,
-          quoteStatus: (item.cart_item_customizations.quote_status as any) || "pending",
+          quoteStatus: (item.cart_item_customizations.quote_status as 'not_needed' | 'pending' | 'approved' | 'rejected') || 'pending',
           requiresManualReview: item.cart_item_customizations.requires_manual_review,
           uploads: (item.cart_item_customizations.customization_uploads || []).map((u) => ({
             id: u.id,
@@ -203,28 +198,28 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setCart({
         cartId: activeCart.id,
         userId: user.id,
-        currency: "INR",
+        currency: 'INR',
         items: cartItems,
         pricing: calculatePricing(cartItems),
       });
     } catch (err) {
-      console.error("Cart refresh error:", err);
-      setError(err instanceof Error ? err.message : "Failed to load cart");
+      console.error('Cart refresh error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load cart');
     } finally {
       setLoading(false);
     }
-  }, [getOrCreateActiveCart, mounted]);
+  }, [getOrCreateActiveCart, supabase]);
 
-  const addToCart = async (item: Omit<CartItem, "cartItemId" | "lineTotal">) => {
+  const addToCart = async (item: Omit<CartItem, 'cartItemId' | 'lineTotal'>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Must be logged in");
+      if (!user) throw new Error('Must be logged in');
 
       const activeCart = await getOrCreateActiveCart(user.id);
 
       const resolvedVariant = await resolveVariantForStock(item.productId, item.variantId);
       if (!resolvedVariant) {
-        throw new Error("Stock variant is missing for this product.");
+        throw new Error('Stock variant is missing for this product.');
       }
 
       const lineTotal = item.unitPrice * item.quantity;
@@ -233,12 +228,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (!item.customization) {
         const existingItemQuery = supabase
-          .from("cart_items")
-          .select("id, quantity")
-          .eq("cart_id", activeCart.id)
-          .eq("product_id", item.productId)
-          .eq("item_type", item.itemType)
-          .eq("variant_id", resolvedVariant.id);
+          .from('cart_items')
+          .select('id, quantity')
+          .eq('cart_id', activeCart.id)
+          .eq('product_id', item.productId)
+          .eq('item_type', item.itemType)
+          .eq('variant_id', resolvedVariant.id);
 
         const { data: existingItem, error: existingItemError } = await existingItemQuery.maybeSingle();
         if (existingItemError) throw existingItemError;
@@ -250,9 +245,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           }
           const newLineTotal = newQuantity * item.unitPrice;
           const { error: updateError } = await supabase
-            .from("cart_items")
+            .from('cart_items')
             .update({ quantity: newQuantity, line_total: newLineTotal, unit_price: item.unitPrice })
-            .eq("id", existingItem.id);
+            .eq('id', existingItem.id);
 
           if (updateError) throw updateError;
           cartItemId = existingItem.id;
@@ -261,7 +256,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             throw new Error(`Only ${resolvedVariant.stock_qty} item(s) left in stock.`);
           }
           const { data: insertedItem, error: insertError } = await supabase
-            .from("cart_items")
+            .from('cart_items')
             .insert({
               cart_id: activeCart.id,
               product_id: item.productId,
@@ -282,7 +277,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           throw new Error(`Only ${resolvedVariant.stock_qty} item(s) left in stock.`);
         }
         const { data: insertedItem, error: insertError } = await supabase
-          .from("cart_items")
+          .from('cart_items')
           .insert({
             cart_id: activeCart.id,
             product_id: item.productId,
@@ -301,7 +296,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (item.customization) {
         const { error: customError } = await supabase
-          .from("cart_item_customizations")
+          .from('cart_item_customizations')
           .insert({
             cart_item_id: cartItemId,
             customization_message: item.customization.message,
@@ -319,17 +314,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
 
       await refreshCart();
-      toast.success("Added to cart");
-      trackEvent("add_to_cart", {
+      toast.success('Added to cart');
+      trackEvent('add_to_cart', {
         item_id: item.productId,
         item_name: item.title,
         price: item.unitPrice,
         quantity: item.quantity,
-        currency: "INR",
+        currency: 'INR',
       });
     } catch (err) {
-      console.error("Add to cart error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to add to cart");
+      console.error('Add to cart error:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to add to cart');
       throw err;
     }
   };
@@ -337,11 +332,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const updateQuantity = async (cartItemId: string, quantity: number) => {
     try {
       const item = cart?.items.find(i => i.cartItemId === cartItemId);
-      if (!item) throw new Error("Item not found");
+      if (!item) throw new Error('Item not found');
 
       const variant = await resolveVariantForStock(item.productId, item.variantId);
       if (!variant) {
-        throw new Error("Stock variant is missing for this cart item.");
+        throw new Error('Stock variant is missing for this cart item.');
       }
       if (quantity > variant.stock_qty) {
         throw new Error(`Only ${variant.stock_qty} item(s) left in stock.`);
@@ -350,17 +345,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const lineTotal = item.unitPrice * quantity;
 
       const { error } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .update({ quantity, line_total: lineTotal })
-        .eq("id", cartItemId);
+        .eq('id', cartItemId);
 
       if (error) throw error;
 
       await refreshCart();
-      toast.success("Cart updated");
+      toast.success('Cart updated');
     } catch (err) {
-      console.error("Update quantity error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to update quantity");
+      console.error('Update quantity error:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to update quantity');
       throw err;
     }
   };
@@ -368,17 +363,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const removeItem = async (cartItemId: string) => {
     try {
       const { error } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .delete()
-        .eq("id", cartItemId);
+        .eq('id', cartItemId);
 
       if (error) throw error;
 
       await refreshCart();
-      toast.success("Item removed");
+      toast.success('Item removed');
     } catch (err) {
-      console.error("Remove item error:", err);
-      toast.error("Failed to remove item");
+      console.error('Remove item error:', err);
+      toast.error('Failed to remove item');
       throw err;
     }
   };
@@ -388,36 +383,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (!cart) return;
 
       const { error } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .delete()
-        .eq("cart_id", cart.cartId);
+        .eq('cart_id', cart.cartId);
 
       if (error) throw error;
 
       await refreshCart();
-      toast.success("Cart cleared");
+      toast.success('Cart cleared');
     } catch (err) {
-      console.error("Clear cart error:", err);
-      toast.error("Failed to clear cart");
+      console.error('Clear cart error:', err);
+      toast.error('Failed to clear cart');
       throw err;
     }
   };
 
   useEffect(() => {
-    if (mounted) {
-      refreshCart();
-    }
-  }, [mounted]);
-
-  useEffect(() => {
-    if (!mounted) return;
+    refreshCart();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       refreshCart();
     });
 
     return () => subscription.unsubscribe();
-  }, [refreshCart, mounted]);
+  }, [refreshCart, supabase]);
 
   return (
     <CartContext.Provider

@@ -1,14 +1,15 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import type { User, Session } from "@supabase/supabase-js";
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
+import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -20,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 };
@@ -29,23 +30,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const supabase = createClient();
+
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('has_role', {
+        _role: 'admin',
+        _user_id: userId,
+      });
+
+      if (error) {
+        console.error('Failed to check admin role:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(data === true);
+      }
+    } catch (err) {
+      console.error('Error checking admin role:', err);
+      setIsAdmin(false);
+    }
+  };
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
     // Check current session on mount
     const initializeAuth = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        if (currentSession?.user?.id) {
+          await checkAdminRole(currentSession.user.id);
+        }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error('Error initializing auth:', error);
       } finally {
         setLoading(false);
       }
@@ -59,25 +78,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(currentSession?.user ?? null);
       setLoading(false);
 
-      if (event === "SIGNED_IN") {
-        toast.success("Welcome back!");
-      } else if (event === "SIGNED_OUT") {
-        toast.success("Signed out successfully");
+      if (event === 'SIGNED_IN') {
+        toast.success('Welcome back!');
+        if (currentSession?.user?.id) {
+          await checkAdminRole(currentSession.user.id);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        toast.success('Signed out successfully');
+        setIsAdmin(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [mounted]);
+  }, [supabase]);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      toast.success("Signed in successfully");
+      toast.success('Signed in successfully');
     } catch (error) {
-      console.error("Sign in error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to sign in");
+      console.error('Sign in error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to sign in');
       throw error;
     } finally {
       setLoading(false);
@@ -100,20 +123,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Create profile record
       if (data.user) {
-        const { error: profileError } = await supabase.from("profiles").insert({
+        const { error: profileError } = await supabase.from('profiles').insert({
           id: data.user.id,
           email: email,
           full_name: fullName,
         });
         if (profileError) {
-          console.error("Profile creation failed:", profileError);
+          console.error('Profile creation failed:', profileError);
+          // Don't throw - user was created but profile is missing
+          // Consider a background job to sync profiles
         }
       }
 
-      toast.success("Account created! Please check your email to verify.");
+      toast.success('Account created! Please check your email to verify.');
     } catch (error) {
-      console.error("Sign up error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create account");
+      console.error('Sign up error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create account');
       throw error;
     } finally {
       setLoading(false);
@@ -128,8 +153,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setSession(null);
     } catch (error) {
-      console.error("Sign out error:", error);
-      toast.error("Failed to sign out");
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
       throw error;
     } finally {
       setLoading(false);
@@ -139,13 +164,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/reset-password` : "/reset-password",
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast.success("Password reset email sent!");
+      toast.success('Password reset email sent!');
     } catch (error) {
-      console.error("Reset password error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send reset email");
+      console.error('Reset password error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to send reset email');
       throw error;
     }
   };
@@ -156,6 +181,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         session,
         loading,
+        isAdmin,
         signIn,
         signUp,
         signOut,
