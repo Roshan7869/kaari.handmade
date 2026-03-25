@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface NavItem {
   label: string;
@@ -36,48 +37,52 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut, loading } = useAuth();
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        if (!user) {
-          redirect("/login");
-          return;
-        }
-
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-
-        if (!roles) {
-          redirect("/");
-          return;
-        }
-
-        setIsAdmin(true);
-      } catch (err) {
-        console.error("Admin check error:", err);
-        redirect("/");
-      } finally {
-        setLoading(false);
+    if (!loading) {
+      if (!user) {
+        router.push("/login");
+        return;
       }
-    };
 
-    checkAdmin();
-  }, [user]);
+      if (!isAdmin) {
+        toast.error("Admin access required");
+        router.push("/");
+        return;
+      }
+    }
+  }, [user, isAdmin, loading, router]);
 
   const handleSignOut = async () => {
     await signOut();
-    redirect("/login");
+    router.push("/login");
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-kaari-dark/20 border-t-kaari-dark rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-kaari-dark">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 text-lg">Access Denied</p>
+          <p className="text-kaari-dark/60 mt-2">You don't have permission to access this area.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
