@@ -91,6 +91,17 @@ out
 # vercel
 .vercel
 
+# Turbopack
+.turbopack
+
+# Vite (old build)
+dist/
+.vite
+
+# Old audit scripts
+*.audit.ts
+*.db_check.ts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
