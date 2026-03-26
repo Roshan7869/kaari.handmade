@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -12,10 +12,12 @@ import KaariFooter from '@/components/KaariFooter';
 import Navbar from '@/components/Navbar';
 import { Star } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import ShareDrawer, { ShareButton } from '@/components/ShareDrawer';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const product = slug ? getProductBySlug(slug) : undefined;
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     if (!product) return;
@@ -69,9 +71,12 @@ export default function ProductDetail() {
                 <p className="font-heritage text-accent text-sm tracking-[0.3em] uppercase mb-2">
                   {product.category}
                 </p>
-                <h1 className="font-display text-3xl md:text-4xl text-foreground mb-3">
-                  {product.name}
-                </h1>
+                <div className="flex items-start gap-3">
+                  <h1 className="font-display text-3xl md:text-4xl text-foreground mb-3 flex-1">
+                    {product.name}
+                  </h1>
+                  <ShareButton onClick={() => setShareOpen(true)} className="mt-1 shrink-0" />
+                </div>
                 <div className="flex items-center gap-3">
                   <div className="flex">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -133,6 +138,15 @@ export default function ProductDetail() {
       <RelatedProducts currentSlug={product.slug} />
       <CrochetDivider />
       <KaariFooter />
+
+      <ShareDrawer
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        productName={product.name}
+        productPrice={product.price}
+        productImage={product.images[0]}
+        productUrl={window.location.href}
+      />
     </main>
   );
 }
