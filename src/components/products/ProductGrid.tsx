@@ -31,31 +31,29 @@ interface DisplayProduct {
 
 export default function ProductGrid() {
   const [active, setActive] = useState<Category>('All');
-  const [useDatabase, setUseDatabase] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [page, setPage] = useState(1);
   const pageSize = 9;
 
-  useEffect(() => {
-    const checkDatabase = async () => {
-      try {
-        const { count } = await supabase
-          .from('products')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_active', true);
-
-        setUseDatabase((count || 0) > 0);
-      } catch {
-        setUseDatabase(false);
-      }
-    };
-    checkDatabase();
-  }, []);
+  // Lightweight check: does the database have any active products at all?
+  // Cached long-term so subsequent mounts skip the request entirely.
+  const { data: dbAvailable = false } = useQuery<boolean>({
+    queryKey: ['products-db-check'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+      return (count || 0) > 0;
+    },
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour — database is unlikely to go from populated to empty
+    gcTime: 1000 * 60 * 60,
+  });
 
   const { data: dbProducts = [], isLoading: dbLoading } = useQuery<DatabaseProduct[]>({
     queryKey: ['products', active],
-    enabled: useDatabase,
+    enabled: dbAvailable,
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -108,8 +106,8 @@ export default function ProductGrid() {
     [staticFiltered],
   );
 
-  const products: DisplayProduct[] = useDatabase ? dbProducts : staticProducts;
-  const isLoading = useDatabase && dbLoading;
+  const products: DisplayProduct[] = dbAvailable ? dbProducts : staticProducts;
+  const isLoading = dbAvailable && dbLoading;
 
   const filteredAndSortedProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();

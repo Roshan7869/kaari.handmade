@@ -12,6 +12,8 @@ interface ProductCustomizationProps {
   product: Product;
 }
 
+type ProductVariantRow = Pick<Tables<'product_variants'>, 'id' | 'size' | 'color' | 'price' | 'stock_qty' | 'is_default'>;
+
 export default function ProductCustomization({ product }: ProductCustomizationProps) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -23,7 +25,7 @@ export default function ProductCustomization({ product }: ProductCustomizationPr
   const [submitting, setSubmitting] = useState(false);
   const [dbProductId, setDbProductId] = useState<string | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(true);
-  const [variants, setVariants] = useState<Array<Pick<Tables<'product_variants'>, 'id' | 'size' | 'color' | 'price' | 'stock_qty' | 'is_default'>>>([]);
+  const [variants, setVariants] = useState<ProductVariantRow[]>([]);
 
   const giftPrice = 99;
   const selectedVariant = useMemo(() => {
@@ -67,9 +69,10 @@ export default function ProductCustomization({ product }: ProductCustomizationPr
       setLoadingProduct(true);
       const { data: productRow, error } = await supabase
         .from('products')
-        .select('id')
+        .select('id, product_variants (id, size, color, price, stock_qty, is_default)')
         .eq('slug', product.slug)
         .eq('is_active', true)
+        .order('is_default', { referencedTable: 'product_variants', ascending: false })
         .maybeSingle();
 
       if (error || !productRow?.id) {
@@ -77,18 +80,9 @@ export default function ProductCustomization({ product }: ProductCustomizationPr
         setVariants([]);
       } else {
         setDbProductId(productRow.id);
-
-        const { data: variantRows, error: variantsError } = await supabase
-          .from('product_variants')
-          .select('id, size, color, price, stock_qty, is_default')
-          .eq('product_id', productRow.id)
-          .order('is_default', { ascending: false });
-
-        if (variantsError) {
-          setVariants([]);
-        } else {
-          setVariants(variantRows || []);
-        }
+        setVariants(
+          (productRow.product_variants as ProductVariantRow[]) || [],
+        );
       }
       setLoadingProduct(false);
     };

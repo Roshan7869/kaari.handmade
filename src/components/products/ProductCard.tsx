@@ -1,7 +1,10 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Product } from '@/data/products';
+
+const STAR_INDICES = [0, 1, 2, 3, 4];
 
 interface GridProduct {
   id?: string;
@@ -22,7 +25,7 @@ function isGridProduct(product: Product | GridProduct): product is GridProduct {
   return 'title' in product && 'image' in product && !('name' in product);
 }
 
-export default function ProductCard({ product, index = 0 }: ProductCardProps) {
+function ProductCard({ product, index = 0 }: ProductCardProps) {
   if (isGridProduct(product)) {
     return (
       <motion.div
@@ -112,7 +115,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           <div className="flex items-center gap-1.5">
             <div className="flex">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {STAR_INDICES.map((i) => (
                 <Star
                   key={i}
                   className={`w-3.5 h-3.5 ${
@@ -136,3 +139,5 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     </motion.div>
   );
 }
+
+export default memo(ProductCard);
