@@ -70,9 +70,11 @@ export default function AdminCustomers() {
       const customers: CustomerWithStats[] = (data || []).map((profile) => {
         const orders = profile.orders || [];
         const totalSpent = orders.reduce((sum: number, o: { total_amount: number | null }) => sum + (o.total_amount || 0), 0);
-        const lastOrder = orders.sort((a: { created_at: string }, b: { created_at: string }) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0];
+        const lastOrder = orders.reduce(
+          (latest: { created_at: string } | null, o: { created_at: string }) =>
+            !latest || o.created_at > latest.created_at ? o : latest,
+          null,
+        );
 
         return {
           ...profile,

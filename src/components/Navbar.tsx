@@ -3,7 +3,7 @@ import { ShoppingCart, User, LogOut, Loader2, Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import kaariLogo from '@/assets/kaari-logo.webp';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavbarProps {
@@ -29,7 +29,7 @@ export default function Navbar({ variant = 'solid' }: NavbarProps) {
     setMobileMenuOpen(false);
   }, [location]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       setSigningOut(true);
       await signOut();
@@ -39,7 +39,7 @@ export default function Navbar({ variant = 'solid' }: NavbarProps) {
       setSigningOut(false);
       setShowDropdown(false);
     }
-  };
+  }, [signOut]);
 
   const bgClass = variant === 'transparent'
     ? 'bg-transparent'
