@@ -17,6 +17,9 @@ interface ShareDrawerProps {
   productUrl: string;
 }
 
+/** True on touch devices where the Instagram app deep link is meaningful */
+const isMobile = typeof navigator !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent);
+
 export default function ShareDrawer({
   open,
   onOpenChange,
@@ -26,6 +29,7 @@ export default function ShareDrawer({
   productUrl,
 }: ShareDrawerProps) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   const shareText = `Check out ${productName} — ₹${productPrice.toLocaleString('en-IN')} on Kaari Handmade! ${productUrl}`;
 
@@ -50,6 +54,8 @@ export default function ShareDrawer({
       color: 'bg-black text-white',
       href: `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
     },
+    // Instagram: mobile devices get a deep link to open the app;
+    // desktop users see the Instagram profile page as a fallback
     {
       label: 'Instagram',
       icon: (
@@ -58,29 +64,22 @@ export default function ShareDrawer({
         </svg>
       ),
       color: 'bg-gradient-to-br from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888] text-white',
-      // Instagram doesn't offer a web share URL; opens the app on mobile via deep link
-      href: `instagram://sharesheet?text=${encodeURIComponent(shareText)}`,
+      href: isMobile
+        ? `instagram://sharesheet?text=${encodeURIComponent(shareText)}`
+        : 'https://www.instagram.com/kaari.handmade',
     },
   ];
 
   const handleCopy = async () => {
+    setCopyError(false);
     try {
       await navigator.clipboard.writeText(productUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Legacy fallback for non-HTTPS or older browser contexts
-      const el = document.createElement('textarea');
-      el.value = productUrl;
-      el.style.position = 'fixed';
-      el.style.opacity = '0';
-      document.body.appendChild(el);
-      el.select();
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Clipboard API unavailable (non-HTTPS or permission denied)
+      setCopyError(true);
+      setTimeout(() => setCopyError(false), 3000);
     }
   };
 
@@ -132,17 +131,19 @@ export default function ShareDrawer({
             className="flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3 font-body text-sm transition-colors hover:bg-muted"
           >
             <span className="truncate text-muted-foreground">{productUrl}</span>
-            <span className="flex items-center gap-1.5 shrink-0 text-accent font-medium">
-              {copied ? (
-                <>
+            <span className="flex items-center gap-1.5 shrink-0 font-medium">
+              {copyError ? (
+                <span className="text-red-500">Copy failed — use Ctrl+C</span>
+              ) : copied ? (
+                <span className="text-green-600 flex items-center gap-1">
                   <Check className="h-4 w-4" />
                   Copied!
-                </>
+                </span>
               ) : (
-                <>
+                <span className="text-accent flex items-center gap-1">
                   <Copy className="h-4 w-4" />
                   Copy link
-                </>
+                </span>
               )}
             </span>
           </button>

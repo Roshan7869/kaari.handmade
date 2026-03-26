@@ -46,16 +46,7 @@ async function shareProduct(name: string, price: number, slug: string, e: React.
     try {
       await navigator.clipboard.writeText(url);
     } catch {
-      // Legacy fallback for non-HTTPS or older browser contexts
-      const el = document.createElement('textarea');
-      el.value = url;
-      el.style.position = 'fixed';
-      el.style.opacity = '0';
-      document.body.appendChild(el);
-      el.select();
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      document.execCommand('copy');
-      document.body.removeChild(el);
+      // Clipboard API unavailable (non-HTTPS or permission denied) — silently ignore
     }
   }
 }

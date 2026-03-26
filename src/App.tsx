@@ -22,6 +22,9 @@ const DummyPayment = lazy(() => import("./pages/DummyPayment.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Login = lazy(() => import("./pages/Login.tsx"));
 const Signup = lazy(() => import("./pages/Signup.tsx"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService.tsx"));
+const MarketAudit = lazy(() => import("./pages/MarketAudit.tsx"));
 
 // Admin pages
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout.tsx"));
@@ -51,6 +54,9 @@ const AnimatedRoutes = () => {
         <Route path="/order-confirmation/:orderId" element={<ProtectedRoute><PageTransition><OrderConfirmation /></PageTransition></ProtectedRoute>} />
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+        <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+        <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
+        <Route path="/audit" element={<PageTransition><MarketAudit /></PageTransition>} />
 
         {/* Admin routes with nested layout */}
         <Route path="/admin" element={<AdminLayout />}>
