@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ShoppingCart, User, LogOut, Loader2, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 interface NavbarProps {
   variant?: 'transparent' | 'solid' | 'glass';
@@ -17,10 +19,10 @@ export default function Navbar({ variant = 'solid' }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Check for auth (will be replaced with auth context)
-  const user = null;
-  const authLoading = false;
-  const cartItemCount = 0;
+  // Auth context integration
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { cart } = useCart();
+  const cartItemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   // Handle scroll effect
   useEffect(() => {
@@ -38,8 +40,7 @@ export default function Navbar({ variant = 'solid' }: NavbarProps) {
   }, [pathname]);
 
   const handleSignOut = async () => {
-    // Will be implemented with auth context
-    console.log('Sign out');
+    await signOut();
   };
 
   // Determine navbar style based on variant and scroll state

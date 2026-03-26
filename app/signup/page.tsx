@@ -39,12 +39,12 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-kaari-cream/30 flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        <h1 className="font-display text-3xl text-kaari-dark mb-2 text-center">Join Kaari</h1>
-        <p className="text-center text-kaari-dark/60 mb-8">Create your account to get started</p>
+      <div className="w-full max-w-md bg-background rounded-lg shadow-lg p-8">
+        <h1 className="font-display text-3xl text-foreground mb-2 text-center">Join Kaari</h1>
+        <p className="text-center text-muted-foreground mb-8">Create your account to get started</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}

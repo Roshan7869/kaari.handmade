@@ -5,7 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
-import { Sonner } from '@/components/ui/sonner';
+import { Toaster as Sonner } from 'sonner';
 import { useState } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {

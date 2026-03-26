@@ -9,9 +9,9 @@ export default function ProductGallery() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-16 md:py-24 bg-background">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="font-display text-4xl text-center text-kaari-dark mb-4">
+        <h2 className="font-display text-4xl text-center text-foreground mb-4">
           Featured Products
         </h2>
         <p className="text-center text-kaari-dark/60 mb-16 max-w-2xl mx-auto">
