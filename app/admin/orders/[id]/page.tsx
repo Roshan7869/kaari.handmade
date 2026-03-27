@@ -1,9 +1,5 @@
 import AdminOrderDetail from "@/pages/admin/AdminOrderDetail";
 
-export default function AdminOrderDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function AdminOrderDetailPage() {
   return <AdminOrderDetail />;
 }

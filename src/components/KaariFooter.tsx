@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import darkWoolTexture from '@/assets/dark-wool-texture.webp';
 import kaariLogo from '@/assets/kaari-logo.webp';
 
@@ -11,7 +12,7 @@ export default function KaariFooter() {
       <div className="absolute inset-0 bg-kaari-dark/80" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6">
-        <div className="grid md:grid-cols-3 gap-12 text-center md:text-left">
+        <div className="grid md:grid-cols-4 gap-12 text-center md:text-left">
           {/* Brand */}
           <div>
             <img src={kaariLogo} alt="Kaari Logo" className="w-16 h-16 object-contain mb-2 mx-auto md:mx-0" />
@@ -46,12 +47,29 @@ export default function KaariFooter() {
             </div>
           </div>
 
-          {/* Features */}
+          {/* Services */}
           <div>
             <h4 className="font-display text-kaari-cream text-lg mb-4">Services</h4>
             <div className="space-y-2 font-heritage text-kaari-cream/70 text-sm">
               <p>✦ Online Orders Accepted</p>
               <p>✦ Customisation Available</p>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="font-display text-kaari-cream text-lg mb-4">Legal</h4>
+            <div className="space-y-2 font-heritage text-kaari-cream/70 text-sm">
+              <p>
+                <Link to="/privacy" className="thread-underline hover:text-kaari-gold transition-colors">
+                  Privacy Policy
+                </Link>
+              </p>
+              <p>
+                <Link to="/terms" className="thread-underline hover:text-kaari-gold transition-colors">
+                  Terms of Service
+                </Link>
+              </p>
             </div>
           </div>
         </div>

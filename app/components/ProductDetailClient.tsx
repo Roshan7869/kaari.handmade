@@ -126,7 +126,7 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
             <div className="relative aspect-square rounded-xl overflow-hidden bg-card">
               {images.length > 0 ? (
                 <Image
-                  src={images[selectedImageIndex]?.url ?? '/placeholder.svg'}
+                  src={images[selectedImageIndex]?.file_path ?? '/placeholder.svg'}
                   alt={product.title}
                   fill
                   className="object-cover"
@@ -151,7 +151,7 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
                     }`}
                   >
                     <Image
-                      src={img.url}
+                      src={img.file_path}
                       alt={`${product.title} ${idx + 1}`}
                       fill
                       className="object-cover"

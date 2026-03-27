@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface NavItem {
   label: string;
@@ -64,11 +65,8 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-kaari-dark/20 border-t-kaari-dark rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-kaari-dark">Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -78,22 +76,10 @@ export default function AdminLayout({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-red-600 text-lg">Access Denied</p>
-          <p className="text-kaari-dark/60 mt-2">You don't have permission to access this area.</p>
+          <p className="text-kaari-dark/60 mt-2">You don&apos;t have permission to access this area.</p>
         </div>
       </div>
     );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return null;
   }
 
   return (

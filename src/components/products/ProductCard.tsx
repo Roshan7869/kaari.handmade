@@ -1,6 +1,6 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Share2, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Product } from '@/data/products';
 
@@ -25,7 +25,41 @@ function isGridProduct(product: Product | GridProduct): product is GridProduct {
   return 'title' in product && 'image' in product && !('name' in product);
 }
 
+function buildShareUrl(slug: string) {
+  // Always called from a click handler — window is always defined here
+  const origin = window.location.origin;
+  return `${origin}/products/${slug}`;
+}
+
+async function shareProduct(name: string, price: number, slug: string, e: React.MouseEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+  const url = buildShareUrl(slug);
+  const shareText = `Check out ${name} — ₹${price.toLocaleString('en-IN')} on Kaari Handmade!`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: name, text: shareText, url });
+    } catch {
+      // User cancelled or browser denied — silently ignore
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Clipboard API unavailable (non-HTTPS or permission denied) — silently ignore
+    }
+  }
+}
+
 function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const handleShare = useCallback(
+    (e: React.MouseEvent) => {
+      const name = isGridProduct(product) ? product.title : (product as Product).name;
+      shareProduct(name, product.price, product.slug, e);
+    },
+    [product],
+  );
+
   if (isGridProduct(product)) {
     return (
       <motion.div
@@ -47,6 +81,15 @@ function ProductCard({ product, index = 0 }: ProductCardProps) {
               loading="lazy"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+
+            {/* Share button — top-right, visible on hover */}
+            <button
+              onClick={handleShare}
+              aria-label="Share product"
+              className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full border border-white/30 bg-black/40 p-2 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/60"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </button>
 
             <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
               <span className="block w-full text-center py-3 bg-primary text-primary-foreground font-body text-xs tracking-[0.15em] uppercase">
@@ -97,6 +140,15 @@ function ProductCard({ product, index = 0 }: ProductCardProps) {
             loading="lazy"
           />
           <div className="absolute inset-0 bg-kaari-dark/0 group-hover:bg-kaari-dark/20 transition-colors duration-500" />
+
+          {/* Share button — top-right, visible on hover */}
+          <button
+            onClick={handleShare}
+            aria-label="Share product"
+            className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full border border-white/30 bg-black/40 p-2 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/60"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+          </button>
 
           <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
             <span className="block w-full text-center py-3 bg-primary text-primary-foreground font-body text-xs tracking-[0.15em] uppercase border border-kaari-gold/30">

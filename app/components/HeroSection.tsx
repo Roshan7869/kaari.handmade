@@ -1,43 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
-// Parallax scroll hook
-function useParallax(value: number, distance: number) {
-  return useTransform(useScroll().scrollY, [0, 1], [value, distance]);
-}
-
-// Mouse position hook for interactive effects
-function useMousePosition() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 20,
-        y: (e.clientY / window.innerHeight - 0.5) * 20,
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  return position;
-}
-
 export default function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mousePosition = useMousePosition();
   const { scrollY } = useScroll();
 
   // Parallax transforms
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
   const contentY = useTransform(scrollY, [0, 500], [0, 50]);
-  const logoRotate = useTransform(mousePosition.x, [-10, 10], [-5, 5]);
   const logoScale = useTransform(scrollY, [0, 200], [1, 0.8]);
 
   // Animation variants
@@ -136,7 +110,7 @@ export default function HeroSection() {
           {/* Logo */}
           <motion.div
             variants={logoVariants}
-            style={{ rotate: logoRotate, scale: logoScale }}
+            style={{  scale: logoScale }}
             className="mb-6"
           >
             <div className="relative w-28 h-28 md:w-36 md:h-36 mx-auto">
