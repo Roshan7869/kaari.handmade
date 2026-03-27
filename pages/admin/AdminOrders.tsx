@@ -37,6 +37,7 @@ import type { Tables } from '@/types/database';
 
 const supabase = createClient();
 
+
 type OrderStatus =
   | 'pending'
   | 'processing'

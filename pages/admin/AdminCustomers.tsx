@@ -27,6 +27,7 @@ import type { Tables } from '@/types/database';
 
 const supabase = createClient();
 
+
 interface CustomerWithStats extends Tables<'profiles'> {
   order_count: number;
   total_spent: number;

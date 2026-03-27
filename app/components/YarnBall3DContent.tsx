@@ -1,48 +1,34 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
+interface YarnBall3DContentProps {
+  color?: string;
+  animated?: boolean;
+}
 
-function AnimatedYarnBall() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = clock.getElapsedTime() * 0.3;
-      meshRef.current.rotation.y = clock.getElapsedTime() * 0.5;
-    }
-  });
-
+export function YarnBall3DContent({ color = '#FF6B9D', animated = true }: YarnBall3DContentProps) {
   return (
-    <group ref={groupRef}>
-      <mesh ref={meshRef}>
-        <Sphere args={[1.5, 64, 64]}>
-          <meshPhongMaterial
-            color="#c084fc"
-            wireframe={false}
-            shininess={100}
-          />
-        </Sphere>
-      </mesh>
-
-      {/* Lighting */}
-      <pointLight position={[10, 10, 10]} intensity={0.7} />
-      <ambientLight intensity={0.5} />
-    </group>
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div
+        className={`relative rounded-full ${animated ? 'animate-pulse' : ''}`}
+        style={{
+          width: '80%',
+          height: '80%',
+          background: `radial-gradient(circle at 35% 35%, ${color}dd, ${color}88 50%, ${color}44)`,
+          boxShadow: `0 0 30px ${color}55, inset 0 0 20px ${color}33`,
+        }}
+      >
+        <div className="absolute inset-0 rounded-full overflow-hidden">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute inset-0 rounded-full border-2"
+              style={{ borderColor: `${color}66`, transform: `rotate(${i * 22.5}deg)` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
-export function YarnBall3DContent() {
-  return (
-    <Canvas
-      camera={{ position: [0, 0, 3], fov: 50 }}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <AnimatedYarnBall />
-      <OrbitControls enableZoom={false} autoRotate />
-    </Canvas>
-  );
-}
+export default YarnBall3DContent;

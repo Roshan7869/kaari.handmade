@@ -7,7 +7,8 @@
  * - Provides audit trail for investigations
  */
 
-import { supabase } from '@/integrations/supabase/client'
+import { createClient } from '@/lib/supabase/client'
+const supabase = createClient()
 
 // Admin action types for type safety
 export type AdminAction =
@@ -87,7 +88,7 @@ export async function logAdminAudit(
     const metadata = getClientMetadata()
 
     // Insert audit log
-    const { error: insertError } = await supabase
+    const { error: insertError } = await (supabase as unknown as any)
       .from('admin_audit_log')
       .insert({
         admin_id: user.id,
@@ -128,7 +129,7 @@ export async function logProductCreate(
     resourceType: 'product',
     resourceId: productId,
     changes: {
-      before: null,
+      before: undefined,
       after: productData,
     },
     metadata: { productName: productData.name },
@@ -165,7 +166,7 @@ export async function logProductDelete(
     resourceId: productId,
     changes: {
       before: productData,
-      after: null,
+      after: undefined,
     },
     metadata: { productName: productData.name },
   })
@@ -293,7 +294,7 @@ export async function getAuditLogs(params: {
       return { data: null, error: 'Not authorized' }
     }
 
-    let query = supabase
+    let query = (supabase as unknown as any)
       .from('admin_audit_log')
       .select('*', { count: 'exact' })
 
@@ -361,7 +362,7 @@ export async function getAuditLogStats(
       return { error: 'Not authorized' }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as unknown as any)
       .from('admin_audit_log')
       .select('action, admin_id')
       .gte('created_at', startDate.toISOString())

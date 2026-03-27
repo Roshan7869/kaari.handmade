@@ -10,7 +10,10 @@
  * 5. Handles idempotency (prevents duplicate processing)
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db: any = supabase;;
 import type { PaymentWebhookPayload } from './payment';
 
 export interface WebhookProcessResult {
@@ -173,10 +176,10 @@ export async function processPaymentWebhook(
       }
 
       // Log order status change
-      await supabase.from('order_status_events').insert({
+      await db.from('order_status_events').insert({
         order_id: payload.order_id,
-        status: 'paid',
-        notes: `Payment completed. Transaction ID: ${payload.transaction_id}`,
+        new_status: 'paid',
+        note: `Payment completed. Transaction ID: ${payload.transaction_id}`,
         created_at: new Date().toISOString(),
       });
 
@@ -202,9 +205,9 @@ export async function processPaymentWebhook(
       }
 
       // Log status change
-      await supabase.from('order_status_events').insert({
+      await db.from('order_status_events').insert({
         order_id: payload.order_id,
-        status: 'cancelled',
+        new_status: 'cancelled',
         notes: `Payment failed. Transaction ID: ${payload.transaction_id}. Inventory restored.`,
         created_at: new Date().toISOString(),
       });

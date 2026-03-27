@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/dialog';
 import {
 
-const supabase = createClient();
+
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -52,6 +52,8 @@ const supabase = createClient();
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+
+const supabase = createClient();
 
 interface ProductFormData {
   title: string;

@@ -1,4 +1,4 @@
-import { createServerClient, CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -8,33 +8,26 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error')
 
   if (error) {
-    return NextResponse.redirect(new URL(`/auth/error?error=${error}`, request.url))
+    return NextResponse.redirect(new URL(`/login?error=${error}`, request.url))
   }
 
   if (code) {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
+          getAll() {
+            return cookieStore.getAll()
           },
-          set(name: string, value: string, options: CookieOptions) {
+          setAll(cookiesToSet) {
             try {
-              cookieStore.set(name, value, options)
-            } catch (error) {
-              // Handle cookie setting errors silently for SSR
-              console.error('[v0] Error setting cookie:', error)
-            }
-          },
-          remove(name: string, options: CookieOptions) {
-            try {
-              cookieStore.delete(name)
-            } catch (error) {
-              // Handle cookie removal errors silently for SSR
-              console.error('[v0] Error removing cookie:', error)
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // ignore in server components
             }
           },
         },
@@ -44,9 +37,9 @@ export async function GET(request: NextRequest) {
     const { error: err } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!err) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
-  return NextResponse.redirect(new URL('/auth/error', request.url))
+  return NextResponse.redirect(new URL('/login', request.url))
 }

@@ -13,7 +13,7 @@ interface ProtectedRouteProps {
  * If user is not authenticated, redirects to login page with return path preserved.
  * If requireAdmin=true, also checks for admin role (delegated to component level for now).
  */
-export default function ProtectedRoute({ children, requireAdmin }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requireAdmin: _requireAdmin }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
 

@@ -9,7 +9,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
-import { logSecurity } from './logger'
+import { logSecurityEvent as logSecurity } from './logger'
 
 // Rate limit configuration
 const RATE_LIMITS = {
@@ -98,7 +98,7 @@ export function checkRateLimit(
     return {
       allowed: true,
       remaining: config.maxAttempts,
-      resetAt: new Date(cached?.firstAttempt + config.windowMs || now + config.windowMs),
+      resetAt: new Date((cached?.firstAttempt ?? now) + config.windowMs),
       blocked: false,
     }
   }

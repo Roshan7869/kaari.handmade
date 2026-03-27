@@ -7,8 +7,9 @@
  * - Blocking suspicious IPs/users temporarily
  */
 
-import { supabase } from '@/integrations/supabase/client'
-import { logSecurity } from './logger'
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
+import { logSecurityEvent as logSecurity } from './logger'
 
 // Rate limit configuration
 const RATE_LIMITS = {
@@ -97,7 +98,7 @@ export function checkRateLimit(
     return {
       allowed: true,
       remaining: config.maxAttempts,
-      resetAt: new Date(cached?.firstAttempt + config.windowMs || now + config.windowMs),
+      resetAt: new Date((cached?.firstAttempt ?? now) + config.windowMs),
       blocked: false,
     }
   }

@@ -49,6 +49,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const supabase = createClient();
 
+
 export default function AdminProducts() {
   const router = useRouter();
   const [search, setSearch] = useState('');

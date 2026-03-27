@@ -1,9 +1,5 @@
 import AdminProductForm from "@/pages/admin/AdminProductForm";
 
-export default function EditProductPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function EditProductPage() {
   return <AdminProductForm />;
 }

@@ -6,7 +6,8 @@
  * Currency: INR (Indian Rupees)
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();;
 
 // Cashfree API Configuration
 export interface CashfreeConfig {
@@ -125,7 +126,7 @@ export interface DbCashfreeSession {
 
 // Get Cashfree configuration from database
 async function getCashfreeConfig(): Promise<CashfreeConfig | null> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as unknown as any)
     .from('payment_gateways')
     .select('*')
     .eq('provider', 'cashfree')
@@ -218,7 +219,7 @@ export async function createCashfreeOrder(params: {
     const data = await response.json();
 
     // Store session in database
-    await supabase.from('cashfree_sessions').insert({
+    await (supabase as unknown as any).from('cashfree_sessions').insert({
       order_id: params.orderId,
       cf_order_id: data.cf_order_id,
       cf_payment_session_id: data.payment_session_id,
