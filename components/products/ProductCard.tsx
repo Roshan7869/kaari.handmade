@@ -2,7 +2,7 @@
 import { memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Share2, Star } from 'lucide-react';
-import { Link } from 'next/navigation';
+import Link from 'next/link';
 import type { Product } from '@/data/products';
 
 const STAR_INDICES = [0, 1, 2, 3, 4];
@@ -71,7 +71,7 @@ function ProductCard({ product, index = 0 }: ProductCardProps) {
         transition={{ duration: 0.5, delay: index * 0.1 }}
       >
         <Link
-          to={`/products/${product.slug}`}
+          href={`/products/${product.slug}`}
           className="group fabric-card block cursor-pointer h-full"
         >
           <div className="aspect-[3/4] overflow-hidden relative">
@@ -130,7 +130,7 @@ function ProductCard({ product, index = 0 }: ProductCardProps) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
       <Link
-        to={`/products/${staticProduct.slug}`}
+        href={`/products/${staticProduct.slug}`}
         className="group fabric-card block cursor-pointer h-full"
       >
         <div className="aspect-[3/4] overflow-hidden relative">

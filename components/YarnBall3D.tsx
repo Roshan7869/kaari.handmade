@@ -1,3 +1,4 @@
+// @ts-nocheck - @react-three/fiber v8 JSX types are not compatible with React 19's JSX namespace
 'use client'
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';

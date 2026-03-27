@@ -1,4 +1,4 @@
-import AdminCustomers from "@/pages/admin/AdminCustomers";
+import AdminCustomers from "@/pages-legacy/admin/AdminCustomers";
 
 export default function AdminCustomersPage() {
   return <AdminCustomers />;

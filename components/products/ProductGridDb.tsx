@@ -19,7 +19,7 @@ interface Product {
   is_active: boolean;
   product_media: Array<{
     file_path: string;
-    alt_text: string;
+    alt_text: string | null;
   }>;
 }
 

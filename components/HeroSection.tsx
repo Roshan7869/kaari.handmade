@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValue } from 'framer-motion';
 
 // Parallax scroll hook
 function useParallax(value: number, distance: number) {
@@ -34,10 +34,16 @@ export default function HeroSection() {
   const mousePosition = useMousePosition();
   const { scrollY } = useScroll();
 
+  // MotionValue for mouse X position to use with useTransform
+  const mouseX = useMotionValue(0);
+  useEffect(() => {
+    mouseX.set(mousePosition.x);
+  }, [mousePosition.x, mouseX]);
+
   // Parallax transforms
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
   const contentY = useTransform(scrollY, [0, 500], [0, 50]);
-  const logoRotate = useTransform(mousePosition.x, [-10, 10], [-5, 5]);
+  const logoRotate = useTransform(mouseX, [-10, 10], [-5, 5]);
   const logoScale = useTransform(scrollY, [0, 200], [1, 0.8]);
 
   // Animation variants
