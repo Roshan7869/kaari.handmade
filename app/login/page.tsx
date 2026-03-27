@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, Loader2 } from 'lucide-react';
+import { validateEmail } from '@/lib/sanitization';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -16,7 +17,12 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
     try {
       await signIn(email, password);
       router.push('/');
@@ -54,7 +60,15 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block font-body text-sm text-kaari-dark mb-2">Password</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="font-body text-sm text-kaari-dark">Password</label>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-kaari-dark/60 hover:text-kaari-dark transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-kaari-dark/40" />
               <input
@@ -79,7 +93,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-kaari-dark/60 mt-6">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className="text-kaari-dark font-semibold hover:text-kaari-gold transition-colors">
             Sign up
           </Link>

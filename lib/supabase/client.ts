@@ -6,8 +6,8 @@ export function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a dummy client during build/prerender when env vars are not available
-    // This prevents build failures while still requiring env vars at runtime
+    // During build/prerender, env vars may not be available.
+    // Return a dummy client that won't make real requests.
     return createBrowserClient<Database>(
       'https://placeholder.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MjYwMDAwMDAsImV4cCI6MTk0MTQ1NjAwMH0.placeholder'

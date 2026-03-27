@@ -30,7 +30,6 @@ const supabase = createClient();
 
 
 interface CustomerWithStats extends Tables<'profiles'> {
-  email?: string | null;
   order_count: number;
   total_spent: number;
   last_order_date: string | null;
@@ -148,7 +147,7 @@ export default function AdminCustomers() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or email..."
+              placeholder="Search by name..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -188,17 +187,13 @@ export default function AdminCustomers() {
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="font-display text-primary text-lg">
-                          {customer.full_name?.[0]?.toUpperCase() || customer.email?.[0]?.toUpperCase() || '?'}
+                          {customer.full_name?.[0]?.toUpperCase() || '?'}
                         </span>
                       </div>
                       <div>
                         <p className="font-body font-medium text-foreground">
                           {customer.full_name || 'Unknown'}
                         </p>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Mail className="w-3 h-3" />
-                          <span className="font-body text-sm">{customer.email}</span>
-                        </div>
                         {customer.phone && (
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Phone className="w-3 h-3" />
@@ -269,7 +264,7 @@ export default function AdminCustomers() {
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="font-display text-primary text-2xl">
-                    {selectedCustomer.full_name?.[0]?.toUpperCase() || selectedCustomer.email?.[0]?.toUpperCase() || '?'}
+                    {selectedCustomer.full_name?.[0]?.toUpperCase() || '?'}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -277,10 +272,6 @@ export default function AdminCustomers() {
                     {selectedCustomer.full_name || 'Unknown'}
                   </p>
                   <div className="space-y-1 mt-2">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Mail className="w-4 h-4" />
-                      <span className="font-body text-sm">{selectedCustomer.email}</span>
-                    </div>
                     {selectedCustomer.phone && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Phone className="w-4 h-4" />
