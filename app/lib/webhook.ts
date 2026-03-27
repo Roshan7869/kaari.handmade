@@ -84,7 +84,7 @@ export async function validateWebhookSignature(
 
   // SECURITY: Never return true in production without actual validation
   // DEV mode warning is logged but validation still required
-  if (import.meta.env.DEV) {
+  if (process.env.NODE_ENV === 'development') {
     console.warn('WEBHOOK: Running in DEV mode - signature validation is enforced');
   }
 
@@ -130,7 +130,7 @@ export async function processPaymentWebhook(
     const { data: existingPayment } = await supabase
       .from('payments')
       .select('id, status')
-      .eq('external_transaction_id', payload.transaction_id)
+      .eq('provider_payment_id', payload.transaction_id)
       .maybeSingle();
 
     if (existingPayment && existingPayment.status !== 'created') {
@@ -149,9 +149,8 @@ export async function processPaymentWebhook(
     const { error: paymentUpdateError } = await supabase
       .from('payments')
       .update({
-        external_transaction_id: payload.transaction_id,
+        provider_payment_id: payload.transaction_id,
         status: paymentStatus,
-        updated_at: new Date().toISOString(),
       })
       .eq('order_id', payload.order_id)
       .eq('status', 'created');
@@ -167,7 +166,6 @@ export async function processPaymentWebhook(
         .update({
           status: 'paid',
           payment_status: 'completed',
-          updated_at: new Date().toISOString(),
         })
         .eq('id', payload.order_id);
 
@@ -196,7 +194,6 @@ export async function processPaymentWebhook(
         .update({
           status: 'cancelled',
           payment_status: 'failed',
-          updated_at: new Date().toISOString(),
         })
         .eq('id', payload.order_id);
 
@@ -234,10 +231,10 @@ export async function schedulePaymentRetry(
   maxRetries: number = 3
 ): Promise<{ success: boolean; message: string }> {
   try {
-    // Check current retry count
+    // Check current payment status
     const { data: payment } = await supabase
       .from('payments')
-      .select('retry_count, status')
+      .select('status')
       .eq('order_id', orderId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -251,26 +248,6 @@ export async function schedulePaymentRetry(
       return { success: false, message: 'Payment already completed' };
     }
 
-    if ((payment.retry_count || 0) >= maxRetries) {
-      return {
-        success: false,
-        message: `Maximum retry attempts (${maxRetries}) exceeded. Please contact support.`,
-      };
-    }
-
-    // Update retry count
-    const { error } = await supabase
-      .from('payments')
-      .update({
-        retry_count: (payment.retry_count || 0) + 1,
-        last_retry_at: new Date().toISOString(),
-      })
-      .eq('order_id', orderId);
-
-    if (error) {
-      throw error;
-    }
-
     // Generate new checkout session for retry
     // This will be returned to client to redirect to payment page again
     const checkoutSession = {
@@ -278,6 +255,7 @@ export async function schedulePaymentRetry(
       order_id: orderId,
       created_at: new Date().toISOString(),
     };
+    void checkoutSession;
 
     return {
       success: true,
@@ -296,7 +274,7 @@ export async function getOrderPaymentStatus(orderId: string) {
   try {
     const { data } = await supabase
       .from('payments')
-      .select('id, status, external_transaction_id, created_at, updated_at')
+      .select('id, status, provider_payment_id, created_at')
       .eq('order_id', orderId)
       .order('created_at', { ascending: false })
       .limit(1)

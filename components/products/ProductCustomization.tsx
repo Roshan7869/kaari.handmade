@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { Gift, Minus, Palette, Plus, Ruler, Type } from 'lucide-react';
-import { useNavigate } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import type { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { createClient } from '@/lib/supabase/client';

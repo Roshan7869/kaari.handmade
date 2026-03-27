@@ -1,4 +1,4 @@
-import Cart from "@/pages/Cart";
+import Cart from "@/pages-legacy/Cart";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 
 export default function CartPage() {

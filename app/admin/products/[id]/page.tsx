@@ -1,4 +1,4 @@
-import AdminProductForm from "@/pages/admin/AdminProductForm";
+import AdminProductForm from "@/pages-legacy/admin/AdminProductForm";
 
 export default function EditProductPage() {
   return <AdminProductForm />;

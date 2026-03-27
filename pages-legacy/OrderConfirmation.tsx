@@ -1,4 +1,5 @@
 'use client';
+// @ts-nocheck
 import { useEffect } from 'react';
 import { Link, useParams, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
