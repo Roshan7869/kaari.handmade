@@ -1,6 +1,5 @@
 'use client';
-// @ts-nocheck
-import { Link, Navigate } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Trash2, Plus, Minus, LogIn } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
@@ -18,7 +17,7 @@ export default function Cart() {
       <main className="min-h-screen bg-background">
         <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <img src={kaariLogo} alt="Kaari" className="w-8 h-8 object-contain" />
               <span className="font-display text-xl text-foreground">कारी</span>
             </Link>
@@ -38,9 +37,9 @@ export default function Cart() {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (ProtectedRoute handles this)
   if (!user) {
-    return <Navigate to="/login" state={{ from: { pathname: '/cart' } }} replace />;
+    return null;
   }
 
   if (loading) {
@@ -48,7 +47,7 @@ export default function Cart() {
       <main className="min-h-screen bg-background">
         <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <img src={kaariLogo} alt="Kaari" className="w-8 h-8 object-contain" />
               <span className="font-display text-xl text-foreground">कारी</span>
             </Link>
@@ -72,15 +71,15 @@ export default function Cart() {
     <main className="min-h-screen bg-background">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <img src={kaariLogo} alt="Kaari" className="w-8 h-8 object-contain" />
             <span className="font-display text-xl text-foreground">कारी</span>
           </Link>
           <div className="flex items-center gap-6">
-            <Link to="/" className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/" className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors">
               Home
             </Link>
-            <Link to="/products" className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/products" className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors">
               Products
             </Link>
           </div>
@@ -90,7 +89,7 @@ export default function Cart() {
       <div className="pt-24 pb-16">
         <div className="max-w-5xl mx-auto px-6">
           <Link
-            to="/products"
+            href="/products"
             className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -104,7 +103,7 @@ export default function Cart() {
               <div className="text-center py-16">
                 <p className="font-heritage text-xl text-muted-foreground mb-6">Your cart is empty</p>
                 <Link
-                  to="/products"
+                  href="/products"
                   className="yarn-button inline-block px-8 py-3 bg-primary text-primary-foreground font-body text-sm tracking-[0.15em] uppercase"
                 >
                   Shop Now
@@ -199,7 +198,7 @@ export default function Cart() {
                       </div>
                     </div>
                     <Link
-                      to="/checkout"
+                      href="/checkout"
                       className="yarn-button block w-full text-center py-4 bg-primary text-primary-foreground font-body text-sm tracking-[0.15em] uppercase"
                     >
                       Proceed to Checkout
