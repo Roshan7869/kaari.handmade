@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,6 +23,7 @@ export default function ProtectedRoute({ children, requireAdmin }: ProtectedRout
       router.replace('/login');
     }
     if (!loading && user && requireAdmin && !isAdmin) {
+      toast.error('Access denied: admin privileges required');
       router.replace('/');
     }
   }, [loading, user, requireAdmin, isAdmin, router]);
