@@ -51,7 +51,6 @@ type OrderStatus =
 interface AdminOrder extends Tables<'orders'> {
   profiles: {
     full_name: string | null;
-    email: string;
   } | null;
 }
 
@@ -80,8 +79,7 @@ export default function AdminOrders() {
         .select(`
           *,
           profiles (
-            full_name,
-            email
+            full_name
           )
         `)
         .order('created_at', { ascending: false });
@@ -115,18 +113,18 @@ export default function AdminOrders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
-        .select('status')
-        .then((res) => res.data || []);
+        .select('status');
 
       if (error) throw error;
 
-      const statusCounts = (data || []).reduce((acc, order) => {
+      const orders = data || [];
+      const statusCounts = orders.reduce((acc, order) => {
         acc[order.status] = (acc[order.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
       return {
-        total: data?.length || 0,
+        total: orders.length,
         pending: statusCounts['pending'] || 0,
         processing: statusCounts['processing'] || 0,
         shipped: statusCounts['shipped'] || 0,
@@ -265,9 +263,6 @@ export default function AdminOrders() {
                     <TableCell>
                       <div>
                         <p className="font-body text-sm">{order.profiles?.full_name || 'Unknown'}</p>
-                        <p className="font-body text-xs text-muted-foreground">
-                          {order.profiles?.email || ''}
-                        </p>
                       </div>
                     </TableCell>
                     <TableCell className="font-body text-sm font-semibold">

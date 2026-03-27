@@ -30,6 +30,7 @@ const supabase = createClient();
 
 
 interface CustomerWithStats extends Tables<'profiles'> {
+  email?: string | null;
   order_count: number;
   total_spent: number;
   last_order_date: string | null;
@@ -57,7 +58,7 @@ export default function AdminCustomers() {
         .order('created_at', { ascending: false });
 
       if (search) {
-        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+        query = query.ilike('full_name', `%${search}%`);
       }
 
       const from = (page - 1) * limit;

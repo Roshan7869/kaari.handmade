@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, Package, Image as ImageIcon, Camera } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Package, Image as ImageIcon, Camera, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { sanitizeTextInput } from '@/lib/sanitization';
 import { ImageUploader } from '@/components/admin/ImageUploader';
@@ -233,7 +233,6 @@ export default function AdminProductForm() {
     if (variantDialog.editingId) {
       await updateVariant.mutateAsync({
         id: variantDialog.editingId,
-        product_id: id,
         ...variantData,
       });
     } else {
