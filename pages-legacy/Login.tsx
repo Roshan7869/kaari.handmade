@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,14 +10,11 @@ const kaariLogo = '/assets/kaari-logo.webp';
 
 export default function Login() {
   const router = useRouter();
-  const location = useLocation();
   const { signIn, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +28,7 @@ export default function Login() {
 
     try {
       await signIn(email, password);
-      router.push(from, { replace: true });
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid credentials');
     }
@@ -44,7 +42,7 @@ export default function Login() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-3 mb-6">
+          <Link href="/" className="inline-flex items-center gap-3 mb-6">
             <img src={kaariLogo} alt="Kaari" className="w-12 h-12 object-contain" />
           </Link>
           <h1 className="font-display text-3xl text-foreground mb-2">Welcome Back</h1>
@@ -101,7 +99,7 @@ export default function Login() {
                 <input type="checkbox" className="w-4 h-4" />
                 <span className="font-body text-sm text-muted-foreground">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="font-body text-sm text-accent hover:underline">
+              <Link href="/forgot-password" className="font-body text-sm text-accent hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -124,8 +122,8 @@ export default function Login() {
 
           <div className="mt-6 text-center">
             <p className="font-body text-sm text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-accent hover:underline">
+              Don&apos;t have an account?{' '}
+              <Link href="/signup" className="text-accent hover:underline">
                 Sign up
               </Link>
             </p>

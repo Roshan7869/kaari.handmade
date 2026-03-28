@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import KaariFooter from '@/components/KaariFooter';
@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
         <div className="max-w-3xl mx-auto px-6">
           {/* Breadcrumb */}
           <Link
-            to="/"
+            href="/"
             className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />

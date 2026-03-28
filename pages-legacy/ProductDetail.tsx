@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, Link, Navigate } from 'next/navigation';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getProductBySlug } from '@/data/products';
@@ -31,7 +32,15 @@ export default function ProductDetail() {
     });
   }, [product]);
 
-  if (!product) return <Navigate to="/products" replace />;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (slug && !product) {
+      router.replace('/products');
+    }
+  }, [slug, product, router]);
+
+  if (!product) return null;
 
   return (
     <main className="overflow-x-hidden">
@@ -41,7 +50,7 @@ export default function ProductDetail() {
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 mb-8">
           <Link
-            to="/products"
+            href="/products"
             className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

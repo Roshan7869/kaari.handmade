@@ -1,7 +1,6 @@
 'use client';
-// @ts-nocheck
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Clock, CreditCard } from 'lucide-react';
 import {
@@ -16,7 +15,7 @@ import { validateRedirectUrl, validateOrderConfirmationUrl } from '@/lib/redirec
 
 export default function DummyPaymentPage() {
   const router = useRouter();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const returnUrlParam = searchParams.get('return_url');
 

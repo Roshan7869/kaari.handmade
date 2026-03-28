@@ -42,7 +42,7 @@ export default function Signup() {
       // Sanitize name before sending to auth
       const sanitizedName = sanitizeTextInput(fullName, 100);
       await signUp(email, password, sanitizedName);
-      router.push('/login', { state: { from: { pathname: '/' } } });
+      router.push('/login');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account');
     }
@@ -56,7 +56,7 @@ export default function Signup() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-3 mb-6">
+          <Link href="/" className="inline-flex items-center gap-3 mb-6">
             <img src={kaariLogo} alt="Kaari" className="w-12 h-12 object-contain" />
           </Link>
           <h1 className="font-display text-3xl text-foreground mb-2">Create Account</h1>
@@ -155,7 +155,7 @@ export default function Signup() {
           <div className="mt-6 text-center">
             <p className="font-body text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link to="/login" className="text-accent hover:underline">
+              <Link href="/login" className="text-accent hover:underline">
                 Sign in
               </Link>
             </p>

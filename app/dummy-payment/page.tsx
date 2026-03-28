@@ -1,5 +1,5 @@
 import DummyPayment from "@/pages-legacy/DummyPayment";
-import ProtectedRoute from "@/app/components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function DummyPaymentPage() {
   return (

@@ -52,7 +52,7 @@ interface OrderItem extends Tables<'order_items'> {
     title: string;
     slug: string;
   } | null;
-  variants: {
+  product_variants: {
     sku: string | null;
     size: string | null;
     color: string | null;
@@ -62,7 +62,6 @@ interface OrderItem extends Tables<'order_items'> {
 interface OrderDetail extends Tables<'orders'> {
   profiles: {
     full_name: string | null;
-    email: string;
     phone: string | null;
   } | null;
   order_items: OrderItem[];
@@ -112,11 +111,11 @@ export default function AdminOrderDetail() {
         .from('orders')
         .select(`
           *,
-          profiles (full_name, email, phone),
+          profiles (full_name, phone),
           order_items (
             *,
             products (title, slug),
-            variants (sku, size, color)
+            product_variants (sku, size, color)
           ),
           order_status_events (
             *,
@@ -247,9 +246,9 @@ export default function AdminOrderDetail() {
                   >
                     <div className="flex-1">
                       <p className="font-body font-medium">{item.products?.title || 'Unknown Product'}</p>
-                      {item.variants && (
+                      {item.product_variants && (
                         <p className="font-body text-sm text-muted-foreground">
-                          {[item.variants.size, item.variants.color].filter(Boolean).join(' / ')}
+                          {[item.product_variants.size, item.product_variants.color].filter(Boolean).join(' / ')}
                         </p>
                       )}
                       <p className="font-body text-sm text-muted-foreground">
@@ -409,7 +408,7 @@ export default function AdminOrderDetail() {
                 </div>
                 <div>
                   <p className="font-body font-medium">{order.profiles?.full_name || 'Unknown'}</p>
-                  <p className="font-body text-sm text-muted-foreground">{order.profiles?.email}</p>
+                  <p className="font-body text-sm text-muted-foreground">{order.checkout_sessions?.email || 'No email'}</p>
                 </div>
               </div>
               {order.profiles?.phone && (

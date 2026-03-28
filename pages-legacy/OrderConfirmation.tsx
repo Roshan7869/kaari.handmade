@@ -1,7 +1,7 @@
 'use client';
-// @ts-nocheck
 import { useEffect } from 'react';
-import { Link, useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Package, MapPin, CreditCard, Truck, Clock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -58,7 +58,7 @@ interface OrderDetails {
   order_number: string | null;
   status: string;
   payment_status: string | null;
-  total_amount: number;
+  total_amount: number | null;
   subtotal: number | null;
   shipping_amount: number | null;
   tax_amount: number | null;
@@ -70,7 +70,7 @@ interface OrderDetails {
 
 export default function OrderConfirmation() {
   const { orderId } = useParams<{ orderId: string }>();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const isNewOrder = searchParams.get('new') === 'true';
 
   const { data: order, isLoading } = useQuery({
@@ -106,10 +106,9 @@ export default function OrderConfirmation() {
           id,
           product_id,
           variant_id,
-          product_name,
           quantity,
           unit_price,
-          total_price,
+          line_total,
           customization_snapshot
         `)
         .eq('order_id', orderId);
@@ -120,9 +119,8 @@ export default function OrderConfirmation() {
           // Get product media
           const { data: mediaData } = await supabase
             .from('product_media')
-            .select('url, alt_text')
+            .select('file_path, alt_text')
             .eq('product_id', item.product_id)
-            .eq('media_type', 'image')
             .order('sort_order', { ascending: true })
             .limit(1)
             .maybeSingle();
@@ -130,14 +128,21 @@ export default function OrderConfirmation() {
           // Get product slug
           const { data: productData } = await supabase
             .from('products')
-            .select('name, slug')
+            .select('title, slug')
             .eq('id', item.product_id)
             .maybeSingle();
 
           return {
-            ...item,
-            product: productData || undefined,
-            image: mediaData || undefined,
+            id: item.id,
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            product_name: productData?.title || 'Product',
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.line_total,
+            customization_snapshot: item.customization_snapshot as Record<string, unknown> | null,
+            product: productData ? { name: productData.title, slug: productData.slug } : undefined,
+            image: mediaData ? { url: mediaData.file_path, alt_text: mediaData.alt_text } : undefined,
           };
         })
       );
@@ -244,12 +249,12 @@ export default function OrderConfirmation() {
     <main className="min-h-screen bg-background">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <img src={kaariLogo} alt="Kaari" className="w-8 h-8 object-contain" />
             <span className="font-display text-xl text-foreground">कारी</span>
           </Link>
           <Link
-            to="/products"
+            href="/products"
             className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Continue Shopping
@@ -385,7 +390,7 @@ export default function OrderConfirmation() {
                         {/* Product Details */}
                         <div className="flex-1 min-w-0">
                           <Link
-                            to={`/products/${item.product?.slug || ''}`}
+                            href={`/products/${item.product?.slug || ''}`}
                             className="font-body font-medium text-foreground hover:text-primary transition-colors line-clamp-1"
                           >
                             {item.product_name}
@@ -432,7 +437,7 @@ export default function OrderConfirmation() {
                     )}
                     <div className="flex justify-between font-body text-base font-medium pt-2 border-t border-border">
                       <span className="text-foreground">Total</span>
-                      <span className="text-primary">₹{order.total_amount.toLocaleString('en-IN')}</span>
+                      <span className="text-primary">₹{(order.total_amount ?? 0).toLocaleString('en-IN')}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -547,7 +552,7 @@ export default function OrderConfirmation() {
                       <h3 className="font-display text-lg text-foreground mb-1">Need Help?</h3>
                       <p className="font-body text-sm text-muted-foreground">
                         If you have any questions about your order, please{' '}
-                        <Link to="/contact" className="text-primary hover:underline">
+                        <Link href="/contact" className="text-primary hover:underline">
                           contact our support team
                         </Link>
                         . We're here to help!
@@ -566,7 +571,7 @@ export default function OrderConfirmation() {
                   Your order has been submitted. We could not load detailed metadata right now.
                 </p>
                 <Link
-                  to="/products"
+                  href="/products"
                   className="yarn-button inline-block px-8 py-3 bg-primary text-primary-foreground font-body text-sm tracking-[0.15em] uppercase"
                 >
                   Continue Shopping
@@ -583,13 +588,13 @@ export default function OrderConfirmation() {
                 className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8"
               >
                 <Link
-                  to="/products"
+                  href="/products"
                   className="yarn-button inline-block px-8 py-3 bg-primary text-primary-foreground font-body text-sm tracking-[0.15em] uppercase"
                 >
                   Continue Shopping
                 </Link>
                 <Link
-                  to="/"
+                  href="/"
                   className="inline-block px-8 py-3 border border-border font-body text-sm tracking-[0.15em] uppercase text-foreground hover:bg-accent/10 transition-colors"
                 >
                   Go Home
