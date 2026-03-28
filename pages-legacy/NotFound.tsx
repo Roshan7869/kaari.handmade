@@ -1,5 +1,6 @@
 'use client';
-import { useLocation, Link } from "react-router-dom";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
@@ -7,11 +8,11 @@ import Navbar from "@/components/Navbar";
 import KaariFooter from "@/components/KaariFooter";
 
 const NotFound = () => {
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+    console.error("404 Error: User attempted to access non-existent route:", pathname);
+  }, [pathname]);
 
   return (
     <main className="overflow-x-hidden">
@@ -40,7 +41,7 @@ const NotFound = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/"
+              href="/"
               className="inline-flex items-center justify-center gap-2 yarn-button px-8 py-4 bg-primary text-primary-foreground font-body text-sm tracking-[0.15em] uppercase"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -48,7 +49,7 @@ const NotFound = () => {
             </Link>
             
             <Link
-              to="/products"
+              href="/products"
               className="inline-flex items-center justify-center gap-2 yarn-button px-8 py-4 bg-background text-foreground border border-border font-body text-sm tracking-[0.15em] uppercase hover:bg-accent/5 transition-colors"
             >
               Browse Products
@@ -56,7 +57,7 @@ const NotFound = () => {
           </div>
 
           <p className="font-body text-xs text-muted-foreground mt-8">
-            Error: Requested path "{location.pathname}" does not exist
+            Error: Requested path &quot;{pathname}&quot; does not exist
           </p>
         </motion.div>
       </div>

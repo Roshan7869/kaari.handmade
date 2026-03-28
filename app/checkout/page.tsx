@@ -1,5 +1,5 @@
 import Checkout from "@/pages-legacy/Checkout";
-import ProtectedRoute from "@/app/components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function CheckoutPage() {
   return (
